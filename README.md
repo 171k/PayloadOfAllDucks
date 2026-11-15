@@ -58,15 +58,13 @@ hundreds of payloads.
 Requires **Python 3.10+** (developed and tested on Ubuntu 22.04 and Windows).
 
 ```bash
-git clone https://github.com/USERNAME/PayloadOfAllDucks.git
+git clone https://github.com/171k/PayloadOfAllDucks.git
 cd PayloadOfAllDucks
 python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install .
 poad
 ```
-
-`USERNAME` is a placeholder. Replace it with the real owner once published.
 
 Optional nicer terminal output:
 

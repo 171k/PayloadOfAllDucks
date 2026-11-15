@@ -39,9 +39,9 @@ rich = ["rich>=13.0"]
 dev = ["pytest>=7.0", "build>=1.0"]
 
 [project.urls]
-Homepage = "https://github.com/USERNAME/PayloadOfAllDucks"
-Repository = "https://github.com/USERNAME/PayloadOfAllDucks"
-Issues = "https://github.com/USERNAME/PayloadOfAllDucks/issues"
+Homepage = "https://github.com/171k/PayloadOfAllDucks"
+Repository = "https://github.com/171k/PayloadOfAllDucks"
+Issues = "https://github.com/171k/PayloadOfAllDucks/issues"
 
 [project.scripts]
 poad = "poad.cli:main"
