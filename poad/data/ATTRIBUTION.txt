@@ -1,0 +1,8 @@
+PayloadOfAllDucks builtin templates are original, curated content released under
+the project's MIT License.
+
+Optional importers can ingest third-party collections that you already have
+locally. When importing from PayloadsAllTheThings
+(https://github.com/swisskyrepo/PayloadsAllTheThings, MIT License), POAD records
+the source and MIT attribution on the generated template packs. Preserve those
+notices if you redistribute imported content.

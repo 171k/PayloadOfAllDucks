@@ -1,0 +1,7 @@
+# Normalise line endings to LF in the repository (Ubuntu-first project).
+* text=auto eol=lf
+
+# Treat payload template data and wordlists as text.
+*.json text eol=lf
+*.txt  text eol=lf
+*.py   text eol=lf

