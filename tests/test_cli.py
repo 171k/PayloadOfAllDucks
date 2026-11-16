@@ -11,9 +11,10 @@ from poad import cli
 
 
 def test_version(capsys):
+    from poad import __version__
     assert cli.main(["version"]) == 0
     out = capsys.readouterr().out
-    assert "0.1.0" in out
+    assert __version__ in out
 
 
 def test_list(capsys):
@@ -101,8 +102,9 @@ def test_python_dash_m_entrypoint():
         [sys.executable, "-m", "poad", "version"],
         capture_output=True, text=True,
     )
+    from poad import __version__
     assert result.returncode == 0
-    assert "0.1.0" in result.stdout
+    assert __version__ in result.stdout
 
 
 def test_templates_list(capsys):

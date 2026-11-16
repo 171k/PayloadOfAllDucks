@@ -264,23 +264,22 @@ def run_interactive(console: Console | None = None) -> int:
         print("  poad --help")
         return 0
 
-    modules = list(iter_modules())
     try:
         while True:
             print()
             print(banner(unicode=settings.get("unicode_banner", True)))
             print()
-            for i, mod in enumerate(modules, start=1):
-                print(f"[{i}] {mod.title}")
-            print(f"[{len(modules)+1}] Custom Payload Templates (import/validate)")
+            print("[1] Payload list      - generate wordlists for Burp Intruder")
+            print("[2] Exploit script    - build a request harness for a payload list")
+            print("[3] RCE               - reverse shells, web shells, image polyglots")
             print()
-            print(f"[{len(modules)+2}] Browse Payload Library")
-            print(f"[{len(modules)+3}] Presets")
-            print(f"[{len(modules)+4}] Settings")
+            print("[4] Browse Payload Library")
+            print("[5] Presets")
+            print("[6] Settings")
             print("[0] Exit")
             print()
             try:
-                choice = _ask("Select category", default="")
+                choice = _ask("Select", default="")
             except _Back:
                 continue
             if choice in ("0", "q", "quit", "exit"):
@@ -289,21 +288,49 @@ def run_interactive(console: Console | None = None) -> int:
                 continue
             n = int(choice)
             try:
-                if 1 <= n <= len(modules):
-                    _run_category(modules[n - 1], console)
-                elif n == len(modules) + 1:
-                    _custom_templates_menu(console)
-                elif n == len(modules) + 2:
+                if n == 1:
+                    _payload_list_menu(console)
+                elif n == 2:
+                    _exploit_script_menu(console)
+                elif n == 3:
+                    _rce_menu(console)
+                elif n == 4:
                     _browse_library(console)
-                elif n == len(modules) + 3:
+                elif n == 5:
                     _presets_menu(console)
-                elif n == len(modules) + 4:
+                elif n == 6:
                     _settings_menu(console)
             except _Back:
                 continue
     except _Quit:
         print("\nGoodbye. 🦆" if settings.get("unicode_banner", True) else "\nGoodbye.")
         return 0
+
+
+def _payload_list_menu(console: Console) -> None:
+    """The former top menu: pick a vulnerability category to generate a wordlist."""
+    modules = list(iter_modules())
+    while True:
+        print()
+        console.rule("Payload list")
+        for i, mod in enumerate(modules, start=1):
+            print(f"[{i}] {mod.title}")
+        print(f"[{len(modules)+1}] Custom Payload Templates (import/validate)")
+        print("[0] Back")
+        print()
+        choice = _ask("Select category", default="")
+        if choice in ("0", "", "b", "back"):
+            return
+        if not choice.isdigit():
+            continue
+        n = int(choice)
+        try:
+            if 1 <= n <= len(modules):
+                _run_category(modules[n - 1], console)
+            elif n == len(modules) + 1:
+                _custom_templates_menu(console)
+        except _Back:
+            continue
 
 
 def _custom_templates_menu(console: Console) -> None:
@@ -335,3 +362,130 @@ def _custom_templates_menu(console: Console) -> None:
             console.success(f"Imported {stats.imported} payloads -> {out}")
         except OSError as exc:
             console.error(str(exc))
+
+
+# --------------------------------------------------------------------------
+# Mode 2: Exploit script
+# --------------------------------------------------------------------------
+
+def _write_file(path: str, data, console: Console, *, binary: bool = False) -> bool:
+    from pathlib import Path
+    p = Path(path)
+    if p.exists() and not _ask_flag(f"{path} exists. Overwrite?", default=False):
+        console.warn("Not written.")
+        return False
+    if binary:
+        p.write_bytes(data)
+    else:
+        p.write_text(data, encoding="utf-8", newline="\n")
+    console.success(f"Wrote {p}")
+    return True
+
+
+def _exploit_script_menu(console: Console) -> None:
+    from poad import exploit
+    console.rule("Exploit script")
+    print("Builds a standalone Python harness that sends a payload list at one")
+    print("authorised target. POAD does not send the requests; you run the script.")
+    print()
+    print("  Put the marker FUZZ where each payload should go.")
+    url = _ask("Target URL with FUZZ", default="http://TARGET/?page=FUZZ")
+    wordlist = _ask("Payload wordlist path", default="payloadlist.txt")
+    match = _ask("Match string to flag hits (blank = none)", default="")
+    method = _ask_choice("HTTP method", ["GET", "POST"], default="GET")
+    data = ""
+    if method == "POST":
+        data = _ask("POST body (include FUZZ)", default="")
+    src = exploit.build_exploit_script(
+        url=url, wordlist=wordlist, match=match, method=method, data=data
+    )
+    out = _ask("Output script file", default="exploit.py")
+    if _write_file(out, src, console):
+        print()
+        print("Run it (authorised targets only):")
+        print(f"  python3 {out}")
+        print(f"  python3 {out} -u '{url}' -w {wordlist}"
+              + (f" --match '{match}'" if match else ""))
+
+
+# --------------------------------------------------------------------------
+# Mode 3: RCE
+# --------------------------------------------------------------------------
+
+def _rce_menu(console: Console) -> None:
+    console.rule("RCE")
+    print("[1] Reverse shell one-liners")
+    print("[2] Web shell (php / jsp / aspx)")
+    print("[3] PHP-in-image polyglot (upload-filter bypass)")
+    print("[0] Back")
+    print()
+    choice = _ask("Select method", default="")
+    if choice == "1":
+        _rce_revshell(console)
+    elif choice == "2":
+        _rce_webshell(console)
+    elif choice == "3":
+        _rce_polyglot(console)
+
+
+def _rce_revshell(console: Console) -> None:
+    from poad import rce
+    console.rule("Reverse shell one-liners")
+    os_name = _ask_choice("Target OS", ["linux", "windows"], default="linux")
+    print("  LHOST = your listener IP. On Pwnbox/HTB:  ip -4 addr show tun0")
+    lhost = _ask("LHOST", default="")
+    lport = _ask("LPORT", default="4444")
+    try:
+        shells = rce.reverse_shells(lhost, lport, os_name)
+    except Exception as exc:  # noqa: BLE001
+        console.error(str(exc))
+        return
+    print()
+    for i, s in enumerate(shells, 1):
+        print(f"[{i}] {s.name} ({s.shell})")
+        print("    " + s.payload)
+    print()
+    if _ask_flag("Write all one-liners to a file?", default=True):
+        out = _ask("Output file", default="revshells.txt")
+        _write_file(out, "\n".join(s.payload for s in shells) + "\n", console)
+    print()
+    print("Catch it from Pwnbox (start this BEFORE triggering the shell):")
+    for line in rce.listener_commands(lport):
+        print("  " + line)
+
+
+def _rce_webshell(console: Console) -> None:
+    from poad import rce
+    console.rule("Web shell")
+    lang = _ask_choice("Language", list(rce.WEBSHELL_LANGS), default="php")
+    param = _ask("Command parameter name", default="cmd")
+    try:
+        fn, content = rce.webshell(lang, param=param)
+    except Exception as exc:  # noqa: BLE001
+        console.error(str(exc))
+        return
+    out = _ask("Output file", default=fn)
+    if _write_file(out, content, console):
+        print()
+        print("Use it (authorised targets only):")
+        for line in rce.webshell_commands("http://TARGET/uploads", param):
+            print("  " + line)
+
+
+def _rce_polyglot(console: Console) -> None:
+    from poad import rce
+    console.rule("PHP-in-image polyglot")
+    img = _ask_choice("Image type", list(rce.POLYGLOT_IMAGES), default="png")
+    param = _ask("Command parameter name", default="cmd")
+    try:
+        fn, content = rce.polyglot(img, param=param)
+    except Exception as exc:  # noqa: BLE001
+        console.error(str(exc))
+        return
+    out = _ask("Output file", default=fn)
+    if _write_file(out, content, console, binary=True):
+        print()
+        print("A valid image that also contains PHP. It executes only if the server")
+        print("treats it as PHP. Common triggers:")
+        for line in rce.polyglot_commands(img, param):
+            print("  " + line)

