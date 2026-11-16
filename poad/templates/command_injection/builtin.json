@@ -11,8 +11,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "; <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-unix-pipe",
@@ -21,8 +25,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "| <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-unix-or",
@@ -31,8 +39,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "|| <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-unix-and",
@@ -41,8 +53,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "&& <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-unix-background",
@@ -51,8 +67,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "& <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-unix-subshell",
@@ -61,8 +81,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "$(<<POAD_COMMAND>>)",
-      "required": ["command"],
-      "tags": ["substitution"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "substitution"
+      ]
     },
     {
       "id": "cmdi-unix-backtick",
@@ -71,8 +95,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "`<<POAD_COMMAND>>`",
-      "required": ["command"],
-      "tags": ["substitution"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "substitution"
+      ]
     },
     {
       "id": "cmdi-unix-newline",
@@ -81,8 +109,12 @@
       "platform": "linux",
       "context": "unix",
       "template": "%0a<<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"],
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ],
       "notes": "URL-encoded newline; keep Burp from re-encoding the % if used as-is."
     },
     {
@@ -92,8 +124,12 @@
       "platform": "linux",
       "context": "unix-quoted",
       "template": "'; <<POAD_COMMAND>>; '",
-      "required": ["command"],
-      "tags": ["quoting"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "quoting"
+      ]
     },
     {
       "id": "cmdi-unix-quote-double",
@@ -102,8 +138,12 @@
       "platform": "linux",
       "context": "unix-quoted",
       "template": "\"; <<POAD_COMMAND>>; \"",
-      "required": ["command"],
-      "tags": ["quoting"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "quoting"
+      ]
     },
     {
       "id": "cmdi-win-amp",
@@ -112,8 +152,12 @@
       "platform": "windows",
       "context": "cmd",
       "template": "& <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-win-and",
@@ -122,8 +166,12 @@
       "platform": "windows",
       "context": "cmd",
       "template": "&& <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-win-pipe",
@@ -132,8 +180,12 @@
       "platform": "windows",
       "context": "cmd",
       "template": "| <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-win-or",
@@ -142,8 +194,12 @@
       "platform": "windows",
       "context": "cmd",
       "template": "|| <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
     },
     {
       "id": "cmdi-ps-semicolon",
@@ -152,8 +208,57 @@
       "platform": "windows",
       "context": "powershell",
       "template": "; <<POAD_COMMAND>>",
-      "required": ["command"],
-      "tags": ["separator"]
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "separator"
+      ]
+    },
+    {
+      "id": "cmdi-ps-pipe",
+      "name": "cmdi-ps-pipe",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "powershell",
+      "template": "| <<POAD_COMMAND>>",
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "powershell"
+      ],
+      "notes": "PowerShell pipe separator."
+    },
+    {
+      "id": "cmdi-ps-amp",
+      "name": "cmdi-ps-amp",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "powershell",
+      "template": "& <<POAD_COMMAND>>",
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "powershell"
+      ],
+      "notes": "PowerShell call operator."
+    },
+    {
+      "id": "cmdi-ps-subexpr",
+      "name": "cmdi-ps-subexpr",
+      "category": "command_injection",
+      "platform": "windows",
+      "context": "powershell",
+      "template": "$(<<POAD_COMMAND>>)",
+      "required": [
+        "command"
+      ],
+      "tags": [
+        "powershell"
+      ],
+      "notes": "PowerShell sub-expression."
     }
   ]
 }

