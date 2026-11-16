@@ -1,4 +1,4 @@
-# PayloadOfAllDucks 🦆
+# PayloadOfAllDucks 
 
 **POAD** is a context-aware, **offline** security-payload wordlist generator for
 CTFs and **authorised** penetration testing. You pick a vulnerability category,
