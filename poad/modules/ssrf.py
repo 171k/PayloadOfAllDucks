@@ -48,12 +48,13 @@ class SSRFModule(BaseModule):
 
     def options(self) -> list[Option]:
         return [
-            Option("host", "Authorised host or IP to target (required)",
-                   required=True, prompt="Host or IP"),
+            Option("host", "Authorised host or IP the server will be made to request",
+                   required=True, prompt="Host or IP", example="169.254.169.254"),
             Option("scheme", "URL scheme", type="choice", choices=SCHEMES,
                    default="http", prompt="Scheme"),
-            Option("path", "URL path", default="/", prompt="Path"),
-            Option("port", "Optional port", prompt="Port (optional)"),
+            Option("path", "URL path the target will fetch", default="/",
+                   prompt="Path", example="/latest/meta-data/"),
+            Option("port", "Optional port", prompt="Port (optional)", example="80"),
         ]
 
     def build(self, ctx: dict[str, Any], library) -> BuildOutput:

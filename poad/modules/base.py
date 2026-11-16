@@ -19,6 +19,8 @@ class Option:
     default: Any = None
     choices: tuple[str, ...] = ()
     prompt: str = ""
+    # Short example value shown in interactive prompts / CLI help.
+    example: str = ""
     # Only ask this option interactively when ctx[gate_field] == gate_value.
     gate_field: str | None = None
     gate_value: Any = None

@@ -29,9 +29,11 @@ class SSTIModule(BaseModule):
             Option("mode", "Objective", type="choice", choices=MODES,
                    default="detection", prompt="Mode"),
             Option("file", "File to read (file-read mode only)",
-                   prompt="Target file", gate_field="mode", gate_value="file-read"),
-            Option("marker", "Reflection marker string", default="POAD",
-                   prompt="Marker"),
+                   prompt="Target file", example="/flag/flag.txt",
+                   gate_field="mode", gate_value="file-read"),
+            Option("marker",
+                   "Unique string to look for in the response (proves the payload ran)",
+                   default="POAD", prompt="Marker", example="POAD7391"),
         ]
 
     def engines(self, library) -> list[str]:

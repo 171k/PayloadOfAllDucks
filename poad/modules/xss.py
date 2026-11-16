@@ -36,7 +36,9 @@ class XSSModule(BaseModule):
                    default="unknown", prompt="Injection context"),
             Option("quote", "Attribute/JS quote style", type="choice", choices=QUOTES,
                    default="any", prompt="Quote style"),
-            Option("marker", "Proof marker string", default="POAD", prompt="Marker"),
+            Option("marker",
+                   "Unique string to look for in the response (proof of reflection)",
+                   default="POAD", prompt="Marker", example="POAD7391"),
         ]
 
     def build(self, ctx: dict[str, Any], library) -> BuildOutput:

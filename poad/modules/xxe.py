@@ -35,9 +35,11 @@ class XXEModule(BaseModule):
             Option("mode", "Objective", type="choice", choices=MODES,
                    default="detection", prompt="Mode"),
             Option("file", "File to read (file-read mode)", prompt="Target file",
+                   example="/flag/flag.txt",
                    gate_field="mode", gate_value="file-read"),
-            Option("marker", "Reflection marker (detection mode)", default="POAD",
-                   prompt="Marker"),
+            Option("marker",
+                   "Unique string to look for in the response (proof it rendered)",
+                   default="POAD", prompt="Marker", example="POAD7391"),
         ]
 
     def build(self, ctx: dict[str, Any], library) -> BuildOutput:

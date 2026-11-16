@@ -48,8 +48,8 @@ class LFIModule(BaseModule):
 
     def options(self) -> list[Option]:
         return [
-            Option("file", "Target file to read (e.g. /flag/flag.txt)",
-                   required=True, prompt="Target file"),
+            Option("file", "Target file to read",
+                   required=True, prompt="Target file", example="/flag/flag.txt"),
             Option("os", "Target operating system", type="choice",
                    choices=("linux", "windows"), default="linux",
                    prompt="Target OS"),
@@ -59,9 +59,9 @@ class LFIModule(BaseModule):
                    choices=_FAMILIES, default=list(_FAMILIES),
                    prompt="Payload families"),
             Option("prefix", "Literal string prepended to every payload", default="",
-                   prompt="Path prefix (optional)"),
+                   prompt="Path prefix (optional)", example="file="),
             Option("suffix", "Literal string appended to every payload", default="",
-                   prompt="Path suffix (optional)"),
+                   prompt="Path suffix (optional)", example="%00"),
             Option("null_byte", "Add %00 null-byte suffix variants (legacy PHP)",
                    type="flag", default=False),
             Option("cross_platform",

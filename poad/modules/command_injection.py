@@ -39,7 +39,7 @@ class CommandInjectionModule(BaseModule):
             Option("shell", "Shell context", type="choice", choices=SHELLS,
                    default="any", prompt="Shell context"),
             Option("command", "Harmless diagnostic command to inject",
-                   prompt="Test command (blank = default)"),
+                   prompt="Test command (blank = default)", example="id"),
         ]
 
     def build(self, ctx: dict[str, Any], library) -> BuildOutput:

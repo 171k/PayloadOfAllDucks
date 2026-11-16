@@ -96,6 +96,13 @@ def _collect_options(module, console: Console) -> dict[str, Any]:
         if not opt.applies(ctx):
             continue
         prompt = opt.prompt or opt.help
+        # Show a short hint (what the field is for, and an example) so prompts
+        # like "Marker" or "Target file" are self-explanatory.
+        hint = opt.help
+        if opt.example:
+            hint = f"{hint} (e.g. {opt.example})" if hint else f"e.g. {opt.example}"
+        if hint and opt.prompt and opt.prompt != opt.help:
+            print(f"  {hint}")
         if opt.type == "flag":
             ctx[opt.name] = _ask_flag(prompt, default=bool(opt.default))
         elif opt.type == "int":

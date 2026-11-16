@@ -93,8 +93,11 @@ def _unicode_ok() -> bool:
 def _add_module_arguments(parser: argparse.ArgumentParser, module) -> None:
     for opt in module.options():
         flag = "--" + opt.name.replace("_", "-")
+        help_text = opt.help
+        if opt.example:
+            help_text = f"{help_text} (e.g. {opt.example})"
         # Escape literal '%' so argparse's help formatting (help % params) is safe.
-        kwargs: dict[str, Any] = {"dest": opt.name, "help": opt.help.replace("%", "%%")}
+        kwargs: dict[str, Any] = {"dest": opt.name, "help": help_text.replace("%", "%%")}
         if opt.type == "flag":
             kwargs["action"] = "store_true"
             kwargs["default"] = False
