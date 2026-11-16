@@ -252,21 +252,37 @@ request body with one of these, rather than placing it in a single Sniper marker
 
 ## Exploit script mode
 
-`poad exploit` writes a standalone Python 3 request harness (standard library
-only). You put a `FUZZ` marker in the URL or POST body, point it at a payload
-wordlist, and run it yourself against a single authorised target. POAD does not
-send any requests; it only writes the script.
+`poad exploit` writes a standalone Python 3 script (standard library only),
+tailored to one vulnerability, built around the single payload that worked in
+Burp Intruder (Sniper). POAD asks which bug it is first, then bakes in your
+confirmed payload. POAD does not send any requests; you run the script against a
+single authorised target.
 
 ```bash
-poad exploit --url "http://TARGET/?page=FUZZ" --wordlist payloadlist.txt --match "root:" -o exploit.py
-python3 exploit.py                         # uses the baked-in defaults
-python3 exploit.py -u "http://TARGET/?x=FUZZ" -w payloadlist.txt --match "root:"
+# You found this LFI payload worked in Sniper. Make a reusable script for it:
+poad exploit --vuln lfi --payload "../../../../etc/passwd" --url "http://TARGET/?page=FUZZ"
+python3 exploit_lfi.py                     # fires your confirmed payload
+python3 exploit_lfi.py -p "../../../../etc/shadow"   # read another file
+python3 exploit_lfi.py --decode-base64     # for php://filter output
 ```
 
-The harness sends one request per payload, records status/length/timing, flags
-responses containing your match string, and prints the most interesting ones
-first. Options include `-X/--method`, `-d/--data` (POST body with `FUZZ`),
-`-H/--header`, `--delay`, `--timeout`, and `--urlencode`.
+`--vuln` sets smart defaults for the URL, method, and body (e.g. XXE becomes a
+POST with the XML in the body). `FUZZ` marks where the payload goes. The script
+sends your payload, prints the response, and adds per-vuln helpers:
+
+| Vuln | Helper |
+|---|---|
+| `lfi` | `--decode-base64` for php://filter output |
+| `ssti` | swap the expression with `-p/--payload` |
+| `xss` | reports whether the payload is reflected unescaped |
+| `cmdi` | swap the command inside `-p/--payload` |
+| `sqli` | prints length/body to compare true vs false |
+| `ssrf` | prints what the server fetched |
+| `xxe` | sends the full XML document as the POST body |
+
+It can still sweep a list with `--wordlist`, but defaults to your one confirmed
+payload. Other options: `-X/--method`, `-d/--data` (body with `FUZZ`),
+`-H/--header`, `--delay`, `--timeout`, `--urlencode`.
 
 ## RCE mode
 

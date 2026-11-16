@@ -9,7 +9,7 @@ The user is responsible for only testing generated payloads against systems
 they are authorised to test.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __app_name__ = "PayloadOfAllDucks"
 __cli_name__ = "poad"
 

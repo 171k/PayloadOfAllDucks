@@ -385,27 +385,35 @@ def _write_file(path: str, data, console: Console, *, binary: bool = False) -> b
 def _exploit_script_menu(console: Console) -> None:
     from poad import exploit
     console.rule("Exploit script")
-    print("Builds a standalone Python harness that sends a payload list at one")
-    print("authorised target. POAD does not send the requests; you run the script.")
+    print("Builds a standalone Python exploit tailored to one vulnerability,")
+    print("around the single payload that worked in Burp. POAD writes the script;")
+    print("you run it against an authorised target. Mark the payload spot with FUZZ.")
     print()
-    print("  Put the marker FUZZ where each payload should go.")
-    url = _ask("Target URL with FUZZ", default="http://TARGET/?page=FUZZ")
-    wordlist = _ask("Payload wordlist path", default="payloadlist.txt")
-    match = _ask("Match string to flag hits (blank = none)", default="")
-    method = _ask_choice("HTTP method", ["GET", "POST"], default="GET")
-    data = ""
+    vuln = _ask_choice("Vulnerability", list(exploit.VULNS), default="lfi")
+    d_url, d_method, d_data, d_headers, d_match = exploit.profile_for(vuln)
+    from poad.exploit import _DESCRIBE  # hint text
+    print(f"  {_DESCRIBE.get(vuln, '')}")
+    payload = _ask("Confirmed payload (paste the one that worked)", default="")
+    if not payload:
+        console.warn("No payload given; the script will still be created with an empty one.")
+    url = _ask("Target URL (FUZZ = where the payload goes)", default=d_url)
+    method = _ask_choice("HTTP method", ["GET", "POST"], default=d_method)
+    data = d_data
     if method == "POST":
-        data = _ask("POST body (include FUZZ)", default="")
+        data = _ask("POST body (FUZZ = payload position)", default=d_data or "FUZZ")
+    match = _ask("Match string to flag a hit (blank = vuln default)", default=d_match)
     src = exploit.build_exploit_script(
-        url=url, wordlist=wordlist, match=match, method=method, data=data
+        vuln=vuln, payload=payload, url=url, method=method, data=data,
+        match=match, headers=d_headers,
     )
-    out = _ask("Output script file", default="exploit.py")
+    out = _ask("Output script file", default=f"exploit_{vuln}.py")
     if _write_file(out, src, console):
         print()
         print("Run it (authorised targets only):")
-        print(f"  python3 {out}")
-        print(f"  python3 {out} -u '{url}' -w {wordlist}"
-              + (f" --match '{match}'" if match else ""))
+        print(f"  python3 {out}                 # uses your confirmed payload")
+        print(f"  python3 {out} -p '<payload>'  # try a different payload")
+        if vuln == "lfi":
+            print(f"  python3 {out} --decode-base64 # for php://filter output")
 
 
 # --------------------------------------------------------------------------

@@ -82,13 +82,35 @@ def test_listener_commands_mentions_nc():
 
 def test_exploit_script_compiles():
     src = exploit.build_exploit_script(
-        url="http://t/?x=FUZZ", wordlist="pl.txt", match="root:", method="GET"
+        vuln="lfi", payload="../../../../etc/passwd", match="root:"
     )
     compile(src, "exploit.py", "exec")  # raises SyntaxError if invalid
     assert "argparse" in src
     assert "FUZZ" in src
     assert "AUTHORISED" in src
-    assert "'root:'" in src  # baked default
+    assert "'root:'" in src  # baked default match
+
+
+def test_exploit_is_vuln_aware():
+    src = exploit.build_exploit_script(vuln="lfi", payload="../../etc/passwd")
+    compile(src, "e", "exec")
+    assert "VULN = 'lfi'" in src
+    assert "PAYLOAD = '../../etc/passwd'" in src
+    assert "decode-base64" in src  # lfi helper
+
+
+def test_exploit_all_vulns_compile():
+    for v in exploit.VULNS:
+        src = exploit.build_exploit_script(vuln=v, payload="X")
+        compile(src, "e", "exec")
+        assert f"VULN = {v!r}" in src
+
+
+def test_exploit_xxe_profile_is_post():
+    url, method, data, headers, match = exploit.profile_for("xxe")
+    assert method == "POST"
+    assert data == "FUZZ"
+    assert any("xml" in h.lower() for h in headers)
 
 
 def test_rce_generation_is_offline(monkeypatch, library):

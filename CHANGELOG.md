@@ -4,6 +4,17 @@ All notable changes to PayloadOfAllDucks are documented here. This project
 follows [Semantic Versioning](https://semver.org/) and the format of
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.1] - 2026-11-16
+
+### Changed
+- **Exploit script is now vulnerability-aware.** It asks which bug it is first
+  (lfi/ssti/sqli/xss/cmdi/ssrf/xxe/raw), sets smart URL/method/body defaults for
+  that vuln, and bakes in the one confirmed payload from your Burp Sniper run.
+  The generated script defaults to that single payload (still fuzzes a wordlist
+  with `--wordlist`), adds per-vuln helpers (lfi `--decode-base64`, xss
+  reflection check, `-p/--payload` to swap quickly), and the banner braille-duck
+  now carries the stylized `poad` wordmark underneath.
+
 ## [0.2.0] - 2026-11-16
 
 Adds offensive artifact generation for authorised testing / CTFs. POAD still

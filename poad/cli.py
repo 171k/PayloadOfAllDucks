@@ -579,16 +579,17 @@ def cmd_rce(args, console: Console) -> int:
 
 def cmd_exploit(args, console: Console) -> int:
     from poad import exploit
+    out = args.output or f"exploit_{args.vuln}.py"
     src = exploit.build_exploit_script(
-        url=args.url, wordlist=args.wordlist, match=args.match,
-        method=args.method, data=args.data,
+        vuln=args.vuln, payload=args.payload, url=args.url,
+        match=args.match, method=args.method, data=args.data,
     )
-    if not _write_artifact(args.output, src, args.force, console):
+    if not _write_artifact(out, src, args.force, console):
         return 1
     console.print("")
     console.print("Run it (authorised targets only):")
-    extra = f" --match '{args.match}'" if args.match else ""
-    console.print(f"  python3 {args.output} -u '{args.url}' -w {args.wordlist}{extra}")
+    console.print(f"  python3 {out}                 # uses your confirmed payload")
+    console.print(f"  python3 {out} -p '<payload>'  # try a different payload")
     return 0
 
 
@@ -653,13 +654,16 @@ def build_parser() -> argparse.ArgumentParser:
     r_poly.add_argument("-o", "--output", help="output file (default: shell.php.<img>)")
     r_poly.add_argument("--force", action="store_true")
 
-    p_exp = sub.add_parser("exploit", help="generate a request-harness script")
-    p_exp.add_argument("--url", default="http://TARGET/?page=FUZZ", help="target URL with FUZZ marker")
-    p_exp.add_argument("--wordlist", default="payloadlist.txt")
-    p_exp.add_argument("--match", default="", help="flag responses containing this string")
-    p_exp.add_argument("--method", default="GET", choices=["GET", "POST"])
-    p_exp.add_argument("--data", default="", help="POST body (include FUZZ)")
-    p_exp.add_argument("-o", "--output", default="exploit.py")
+    p_exp = sub.add_parser("exploit", help="generate a vuln-aware exploit script")
+    p_exp.add_argument("--vuln", default="raw",
+                       choices=["lfi", "ssti", "sqli", "xss", "cmdi", "ssrf", "xxe", "raw"],
+                       help="vulnerability the script targets (sets smart defaults)")
+    p_exp.add_argument("--payload", default="", help="the confirmed payload (from Burp Sniper)")
+    p_exp.add_argument("--url", help="target URL with FUZZ marker (default: per-vuln)")
+    p_exp.add_argument("--match", help="flag responses containing this string")
+    p_exp.add_argument("--method", choices=["GET", "POST"], help="HTTP method (default: per-vuln)")
+    p_exp.add_argument("--data", help="POST body with FUZZ (default: per-vuln)")
+    p_exp.add_argument("-o", "--output", help="output file (default: exploit_<vuln>.py)")
     p_exp.add_argument("--force", action="store_true")
 
     sub.add_parser("doctor", help="check installation and library integrity")
